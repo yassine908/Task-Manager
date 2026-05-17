@@ -1,14 +1,24 @@
 package com.example.smarttaskmanager.controller;
 
+import com.example.smarttaskmanager.MainApp;
 import com.example.smarttaskmanager.database.TaskDAO;
 import com.example.smarttaskmanager.model.Task;
+import com.example.smarttaskmanager.model.User;
+import com.example.smarttaskmanager.util.GeminiService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import java.net.URL;
 import java.time.LocalDate;
@@ -16,6 +26,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
+
+    @FXML private BorderPane rootPane;
 
     // ===== FORMULAIRE =====
     @FXML private TextField titleField;
@@ -37,11 +49,20 @@ public class MainController implements Initializable {
     @FXML private Label doneLabel;
     @FXML private Label lateLabel;
     @FXML private Label smartMessage;
+    @FXML private Label currentUserLabel;
     @FXML private PieChart pieChart;
     @FXML private BarChart<String, Number> barChart;
 
+    // ===== CHATBOT =====
+    private Stage chatStage;
+    private TextArea chatHistory;
+    private TextField chatInput;
+    private Button chatSendButton;
+    private Label chatStatus;
+
     // ===== DAO =====
-    private TaskDAO taskDAO = new TaskDAO();
+    private TaskDAO taskDAO;
+    private User currentUser;
     private ObservableList<Task> taskList = FXCollections.observableArrayList();
 
     // ====================================================
@@ -64,7 +85,16 @@ public class MainController implements Initializable {
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
         colDueDate.setCellValueFactory(new PropertyValueFactory<>("dueDate"));
 
-        // Charger les données
+        taskTable.setItems(taskList);
+        totalLabel.setText("0");
+        doneLabel.setText("0");
+        lateLabel.setText("0");
+    }
+
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        this.taskDAO = new TaskDAO(user.getId());
+        currentUserLabel.setText(user.getFullName());
         loadTasks();
     }
 
@@ -81,6 +111,7 @@ public class MainController implements Initializable {
         }
 
         Task task = new Task();
+        task.setUserId(currentUser.getId());
         task.setTitle(title);
         task.setDescription(descField.getText());
         task.setCategory(categoryBox.getValue());
@@ -142,10 +173,76 @@ public class MainController implements Initializable {
         loadTasks();
     }
 
+    @FXML
+    private void handleLogout() {
+        try {
+            if (chatStage != null) {
+                chatStage.close();
+                chatStage = null;
+            }
+            MainApp.showAuthView();
+        } catch (Exception e) {
+            showAlert("Erreur", "Impossible de se déconnecter : " + e.getMessage());
+        }
+    }
+
+    // ====================================================
+    // ASSISTANT CHATBOT
+    // ====================================================
+    @FXML
+    private void handleOpenChatBot() {
+        if (chatStage == null) {
+            createChatBotWindow();
+        }
+
+        chatStage.show();
+        chatStage.toFront();
+        chatInput.requestFocus();
+    }
+
+    @FXML
+    private void handleSendChat() {
+        String message = chatInput.getText().trim();
+        if (message.isEmpty()) {
+            return;
+        }
+
+        appendChat("Vous", message);
+        chatInput.clear();
+        setChatLoading(true);
+
+        javafx.concurrent.Task<String> geminiTask = new javafx.concurrent.Task<>() {
+            @Override
+            protected String call() {
+                return GeminiService.askGemini(buildGeminiPrompt(message));
+            }
+        };
+
+        geminiTask.setOnSucceeded(event -> {
+            appendChat("Gemini", geminiTask.getValue());
+            setChatLoading(false);
+            chatInput.requestFocus();
+        });
+
+        geminiTask.setOnFailed(event -> {
+            appendChat("Gemini", "Erreur pendant la réponse IA. Vérifie ta connexion et la clé API.");
+            setChatLoading(false);
+            chatInput.requestFocus();
+        });
+
+        Thread thread = new Thread(geminiTask, "gemini-chat-request");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
     // ====================================================
     // 📋 CHARGER LES TÂCHES + STATS
     // ====================================================
     private void loadTasks() {
+        if (taskDAO == null) {
+            return;
+        }
+
         List<Task> tasks = taskDAO.getAllTasks();
         taskList.setAll(tasks);
         taskTable.setItems(taskList);
@@ -252,5 +349,102 @@ public class MainController implements Initializable {
         alert.setTitle(title);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void createChatBotWindow() {
+        chatHistory = new TextArea();
+        chatHistory.setEditable(false);
+        chatHistory.setWrapText(true);
+        chatHistory.setPrefHeight(320);
+        chatHistory.getStyleClass().add("chat-history");
+
+        chatInput = new TextField();
+        chatInput.setPromptText("Ex: Ajouter une tâche finir le rapport demain à 18h");
+        chatInput.getStyleClass().add("input-field");
+        chatInput.setOnAction(event -> handleSendChat());
+
+        chatSendButton = new Button("Envoyer");
+        chatSendButton.getStyleClass().add("btn-primary");
+        chatSendButton.setOnAction(event -> handleSendChat());
+
+        HBox inputRow = new HBox(10, chatInput, chatSendButton);
+        inputRow.getStyleClass().add("chat-input-row");
+        HBox.setHgrow(chatInput, javafx.scene.layout.Priority.ALWAYS);
+
+        Label title = new Label("Gemini Bot");
+        title.getStyleClass().add("section-title");
+
+        chatStatus = new Label("Connecté à Gemini");
+        chatStatus.getStyleClass().add("chat-status");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+
+        HBox header = new HBox(8, new Label("🤖"), title, spacer, chatStatus);
+        header.getStyleClass().add("chat-popup-header");
+
+        VBox content = new VBox(12, header, chatHistory, inputRow);
+        content.getStyleClass().add("chat-popup");
+
+        Scene scene = new Scene(content, 520, 430);
+        if (rootPane.getScene() != null) {
+            scene.getStylesheets().addAll(rootPane.getScene().getStylesheets());
+        }
+
+        chatStage = new Stage();
+        chatStage.setTitle("Bot - Smart Task Manager");
+        chatStage.initModality(Modality.NONE);
+        if (rootPane.getScene() != null && rootPane.getScene().getWindow() != null) {
+            chatStage.initOwner(rootPane.getScene().getWindow());
+        }
+        chatStage.setScene(scene);
+        chatStage.setMinWidth(420);
+        chatStage.setMinHeight(340);
+        chatStage.setOnCloseRequest(event -> {
+            event.consume();
+            chatStage.hide();
+        });
+
+        chatHistory.setText("Gemini : Bonjour ! Pose-moi une question sur tes tâches ou ton planning.\n");
+    }
+
+    private void appendChat(String sender, String message) {
+        chatHistory.appendText("\n" + sender + " : " + message + "\n");
+    }
+
+    private void setChatLoading(boolean loading) {
+        chatInput.setDisable(loading);
+        chatSendButton.setDisable(loading);
+        chatStatus.setText(loading ? "Gemini réfléchit..." : "Connecté à Gemini");
+    }
+
+    private String buildGeminiPrompt(String message) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("""
+                Tu es Gemini, l'assistant IA d'une application JavaFX nommée Smart Task Manager.
+                Réponds en français, de façon concise et utile.
+                Aide l'utilisateur à organiser, prioriser, comprendre et améliorer ses tâches.
+                Si l'utilisateur demande une action qui modifie les données, explique clairement quoi faire dans l'interface.
+
+                Tâches actuelles :
+                """);
+
+        List<Task> tasks = taskDAO.getAllTasks();
+        if (tasks.isEmpty()) {
+            prompt.append("- Aucune tâche enregistrée.\n");
+        } else {
+            for (Task task : tasks) {
+                prompt.append("- ")
+                        .append(task.getTitle())
+                        .append(" | catégorie: ").append(task.getCategory())
+                        .append(" | priorité: ").append(task.getPriority())
+                        .append(" | statut: ").append(task.getStatus())
+                        .append(" | échéance: ").append(task.getDueDate() == null ? "non définie" : task.getDueDate())
+                        .append("\n");
+            }
+        }
+
+        prompt.append("\nQuestion utilisateur : ").append(message);
+        return prompt.toString();
     }
 }

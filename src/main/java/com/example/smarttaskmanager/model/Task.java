@@ -5,6 +5,7 @@ import java.time.LocalDate;
 public class Task {
 
     private int id;
+    private int userId;
     private String title;
     private String description;
     private String category;
@@ -16,10 +17,11 @@ public class Task {
     public Task() {}
 
     // Constructeur complet
-    public Task(int id, String title, String description,
+    public Task(int id, int userId, String title, String description,
                 String category, String priority,
                 String status, LocalDate dueDate) {
         this.id = id;
+        this.userId = userId;
         this.title = title;
         this.description = description;
         this.category = category;
@@ -31,6 +33,9 @@ public class Task {
     // Getters & Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
+
+    public int getUserId() { return userId; }
+    public void setUserId(int userId) { this.userId = userId; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }

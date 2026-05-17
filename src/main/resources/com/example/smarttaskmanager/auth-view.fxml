@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.smarttaskmanager.controller.AuthController"
+            styleClass="root-pane auth-root">
+
+    <center>
+        <VBox alignment="CENTER" spacing="22" styleClass="auth-shell">
+            <VBox alignment="CENTER" spacing="4">
+                <Label text="Smart Task Manager" styleClass="auth-title"/>
+                <Label text="Connectez-vous ou créez un compte pour gérer vos propres tâches." styleClass="subtitle-text"/>
+            </VBox>
+
+            <TabPane tabClosingPolicy="UNAVAILABLE" maxWidth="520" styleClass="auth-tabs">
+                <tabs>
+                    <Tab text="Connexion">
+                        <VBox spacing="14" styleClass="auth-card">
+                            <VBox spacing="6">
+                                <Label text="ADRESSE MAIL" styleClass="input-label"/>
+                                <TextField fx:id="loginEmailField" promptText="exemple@mail.com" styleClass="input-field"/>
+                            </VBox>
+
+                            <VBox spacing="6">
+                                <Label text="MOT DE PASSE" styleClass="input-label"/>
+                                <PasswordField fx:id="loginPasswordField" promptText="Votre mot de passe" styleClass="input-field" onAction="#handleLogin"/>
+                            </VBox>
+
+                            <Label fx:id="loginErrorLabel" wrapText="true" styleClass="auth-error"/>
+                            <Button text="Se connecter" maxWidth="Infinity" onAction="#handleLogin" styleClass="btn-primary"/>
+                        </VBox>
+                    </Tab>
+
+                    <Tab text="Inscription">
+                        <VBox spacing="14" styleClass="auth-card">
+                            <HBox spacing="12">
+                                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                    <Label text="NOM" styleClass="input-label"/>
+                                    <TextField fx:id="registerLastNameField" promptText="Nom" styleClass="input-field"/>
+                                </VBox>
+                                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                    <Label text="PRÉNOM" styleClass="input-label"/>
+                                    <TextField fx:id="registerFirstNameField" promptText="Prénom" styleClass="input-field"/>
+                                </VBox>
+                            </HBox>
+
+                            <VBox spacing="6">
+                                <Label text="ADRESSE MAIL" styleClass="input-label"/>
+                                <TextField fx:id="registerEmailField" promptText="exemple@mail.com" styleClass="input-field"/>
+                            </VBox>
+
+                            <VBox spacing="6">
+                                <Label text="MOT DE PASSE" styleClass="input-label"/>
+                                <PasswordField fx:id="registerPasswordField" promptText="Minimum 6 caractères" styleClass="input-field"/>
+                            </VBox>
+
+                            <VBox spacing="6">
+                                <Label text="CONFIRMER LE MOT DE PASSE" styleClass="input-label"/>
+                                <PasswordField fx:id="confirmPasswordField" promptText="Répétez le mot de passe" styleClass="input-field" onAction="#handleRegister"/>
+                            </VBox>
+
+                            <Label fx:id="registerErrorLabel" wrapText="true" styleClass="auth-error"/>
+                            <Button text="Créer mon compte" maxWidth="Infinity" onAction="#handleRegister" styleClass="btn-primary"/>
+                        </VBox>
+                    </Tab>
+                </tabs>
+            </TabPane>
+        </VBox>
+    </center>
+</BorderPane>

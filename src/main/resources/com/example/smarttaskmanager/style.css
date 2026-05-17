@@ -127,6 +127,14 @@
     -fx-font-size: 12px;
 }
 
+.user-badge {
+    -fx-background-color: -color-bg;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-padding: 6 12;
+}
+
 .badge-primary {
     -fx-background-color: -color-bg;
     -fx-background-radius: 6;
@@ -196,6 +204,16 @@
     -fx-background-color: -color-danger-bg;
     -fx-text-fill: -color-danger-text;
     -fx-border-color: transparent;
+}
+
+.btn-bot {
+    -fx-background-color: linear-gradient(to right, #2563eb, #14b8a6);
+    -fx-text-fill: white;
+    -fx-border-color: -color-primary;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-padding: 9 18;
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.24), 12, 0, 0, 4);
 }
 
 .theme-toggle-btn {
@@ -300,6 +318,110 @@
 
 .chart-legend-item {
     -fx-text-fill: -color-text-main;
+}
+
+/* ─── Chatbot ─── */
+.chat-popup {
+    -fx-background-color: -color-bg;
+    -fx-padding: 20;
+    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.chat-popup-header {
+    -fx-background-color: -color-surface;
+    -fx-background-radius: 10;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 10;
+    -fx-padding: 12;
+    -fx-alignment: center-left;
+}
+
+.chat-status {
+    -fx-text-fill: -color-primary;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.chat-input-row {
+    -fx-alignment: center-left;
+}
+
+.chat-panel {
+    -fx-background-color: -color-bg;
+    -fx-background-radius: 10;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 10;
+    -fx-padding: 12;
+}
+
+.chat-history {
+    -fx-background-color: -color-surface;
+    -fx-text-fill: -color-text-main;
+    -fx-background-radius: 10;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 10;
+    -fx-font-size: 13px;
+    -fx-padding: 10;
+}
+
+.chat-history .content {
+    -fx-background-color: -color-surface;
+}
+
+.chat-history:focused {
+    -fx-border-color: -color-primary;
+}
+
+/* ─── Authentification ─── */
+.auth-root {
+    -fx-background-color: -color-bg;
+}
+
+.auth-shell {
+    -fx-padding: 34;
+}
+
+.auth-title {
+    -fx-text-fill: -color-text-main;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+}
+
+.auth-tabs {
+    -fx-background-color: transparent;
+}
+
+.auth-tabs .tab-header-area .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.auth-tabs .tab {
+    -fx-background-color: -color-surface;
+    -fx-border-color: -color-border;
+    -fx-padding: 8 18;
+}
+
+.auth-tabs .tab:selected {
+    -fx-background-color: -color-primary;
+}
+
+.auth-tabs .tab:selected .tab-label {
+    -fx-text-fill: white;
+}
+
+.auth-card {
+    -fx-background-color: -color-surface;
+    -fx-border-color: -color-border;
+    -fx-background-radius: 0 8 8 8;
+    -fx-border-radius: 0 8 8 8;
+    -fx-padding: 24;
+    -fx-effect: dropshadow(gaussian, -color-card-shadow, 18, 0, 0, 8);
+}
+
+.auth-error {
+    -fx-text-fill: -color-danger-text;
+    -fx-font-size: 12px;
+    -fx-min-height: 18;
 }
 
 /* ─── Séparateur ─── */

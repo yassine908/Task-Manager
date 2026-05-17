@@ -29,6 +29,15 @@
             <!-- Spacer -->
             <Region HBox.hgrow="ALWAYS"/>
 
+            <Button text="🤖 Gemini Bot" onAction="#handleOpenChatBot" styleClass="btn-bot"/>
+
+            <HBox alignment="CENTER_LEFT" spacing="8" styleClass="user-badge">
+                <Label text="👤"/>
+                <Label fx:id="currentUserLabel" text="Utilisateur" styleClass="smart-badge-text"/>
+            </HBox>
+
+            <Button text="Déconnexion" onAction="#handleLogout" styleClass="btn-secondary"/>
+
             <!-- Badge message intelligent -->
             <HBox alignment="CENTER_LEFT" spacing="8" styleClass="smart-badge">
                 <Label text="💡" />
