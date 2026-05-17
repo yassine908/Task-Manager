@@ -1,0 +1,309 @@
+/* ═══════════════════════════════════════════════
+   SmartTaskManager — Variables de Thème
+   ═══════════════════════════════════════════════ */
+
+/* MODE CLAIR (Par défaut) */
+.root {
+    -color-bg: #f8fafc;
+    -color-surface: #ffffff;
+    -color-border: #e2e8f0;
+
+    -color-text-main: #0f172a;
+    -color-text-muted: #64748b;
+
+    -color-primary: #3b82f6;
+    -color-primary-hover: #2563eb;
+
+    -color-success-bg: #dcfce7;
+    -color-success-text: #166534;
+
+    -color-danger-bg: #fee2e2;
+    -color-danger-text: #991b1b;
+
+    -color-card-shadow: rgba(0, 0, 0, 0.04);
+}
+
+/* MODE SOMBRE */
+.root.dark-mode {
+    -color-bg: #0f1117;
+    -color-surface: #1e2535;
+    -color-border: #2a3045;
+
+    -color-text-main: #f1f5f9;
+    -color-text-muted: #94a3b8;
+
+    -color-primary: #3b82f6;
+    -color-primary-hover: #60a5fa;
+
+    -color-success-bg: #14532d;
+    -color-success-text: #4ade80;
+
+    -color-danger-bg: #450a0a;
+    -color-danger-text: #f87171;
+
+    -color-card-shadow: rgba(0, 0, 0, 0.3);
+}
+
+/* ─── Structure de base ─── */
+.root-pane {
+    -fx-background-color: -color-bg;
+    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.header-bar {
+    -fx-background-color: -color-surface;
+    -fx-padding: 16 28;
+    -fx-border-color: transparent transparent -color-border transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.main-content {
+    -fx-padding: 24;
+}
+
+.sidebar-right {
+    -fx-background-color: -color-surface;
+    -fx-padding: 24;
+    -fx-min-width: 300;
+    -fx-border-color: transparent transparent transparent -color-border;
+    -fx-border-width: 0 0 0 1;
+}
+
+/* ─── Typographie ─── */
+.title-text {
+    -fx-text-fill: -color-text-main;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.subtitle-text {
+    -fx-text-fill: -color-text-muted;
+    -fx-font-size: 13px;
+}
+
+.section-title {
+    -fx-text-fill: -color-text-main;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.input-label {
+    -fx-text-fill: -color-text-muted;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+/* ─── Composants ─── */
+.card {
+    -fx-background-color: -color-surface;
+    -fx-background-radius: 12;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 12;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, -color-card-shadow, 15, 0, 0, 6);
+}
+
+.logo-container {
+    -fx-background-color: -color-primary;
+    -fx-background-radius: 10;
+    -fx-min-width: 42;
+    -fx-min-height: 42;
+}
+
+.logo-icon {
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+}
+
+.smart-badge {
+    -fx-background-color: transparent;
+    -fx-border-color: -color-primary;
+    -fx-border-radius: 20;
+    -fx-padding: 6 12;
+}
+
+.smart-badge-text {
+    -fx-text-fill: -color-primary;
+    -fx-font-size: 12px;
+}
+
+.badge-primary {
+    -fx-background-color: -color-bg;
+    -fx-background-radius: 6;
+    -fx-padding: 4 8;
+    -fx-border-color: -color-primary;
+    -fx-border-radius: 6;
+}
+
+.badge-text {
+    -fx-text-fill: -color-primary;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+/* ─── Champs de saisie ─── */
+.input-field {
+    -fx-background-color: -color-bg;
+    -fx-text-fill: -color-text-main;
+    -fx-background-radius: 8;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 8;
+    -fx-padding: 8 12;
+    -fx-font-size: 13px;
+}
+
+.input-field:focused {
+    -fx-border-color: -color-primary;
+    -fx-effect: dropshadow(gaussian, -color-primary, 6, 0, 0, 0);
+}
+
+/* ─── Boutons ─── */
+.button, .theme-toggle-btn {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.button:hover, .theme-toggle-btn:hover {
+    -fx-opacity: 0.85;
+}
+
+.button:pressed {
+    -fx-translate-y: 1;
+}
+
+.btn-primary {
+    -fx-background-color: -color-primary;
+    -fx-text-fill: white;
+}
+
+.btn-secondary {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-text-muted;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 8;
+}
+
+.btn-success {
+    -fx-background-color: -color-success-bg;
+    -fx-text-fill: -color-success-text;
+    -fx-border-color: transparent;
+}
+
+.btn-danger {
+    -fx-background-color: -color-danger-bg;
+    -fx-text-fill: -color-danger-text;
+    -fx-border-color: transparent;
+}
+
+.theme-toggle-btn {
+    -fx-background-color: -color-bg;
+    -fx-text-fill: -color-text-main;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 20;
+}
+
+/* ─── TableView (Correction du bug de header blanc) ─── */
+.custom-table {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.custom-table .column-header-background {
+    -fx-background-color: -color-bg;
+    -fx-background-radius: 8 8 0 0;
+}
+
+.custom-table .column-header {
+    -fx-background-color: transparent;
+}
+
+.custom-table .column-header .label {
+    -fx-text-fill: -color-text-muted;
+    -fx-font-weight: bold;
+    -fx-padding: 10;
+}
+
+.custom-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -color-border transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-table-cell-border-color: transparent;
+}
+
+.custom-table .table-row-cell:hover {
+    -fx-background-color: -color-bg;
+}
+
+.custom-table .table-row-cell:selected {
+    -fx-background-color: -color-primary;
+}
+
+.custom-table .table-cell {
+    -fx-text-fill: -color-text-main;
+    -fx-font-size: 13px;
+    -fx-padding: 12 10;
+}
+
+.custom-table .table-row-cell:selected .table-cell {
+    -fx-text-fill: white;
+}
+
+/* ─── Cartes Statistiques ─── */
+.stat-card {
+    -fx-background-radius: 10;
+    -fx-padding: 16;
+}
+
+.stat-title {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.stat-value {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.stat-total {
+    -fx-background-color: -color-bg;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 10;
+}
+.stat-total .stat-title { -fx-text-fill: -color-text-muted; }
+.stat-total .stat-value { -fx-text-fill: -color-text-main; }
+
+.stat-done {
+    -fx-background-color: -color-success-bg;
+}
+.stat-done .stat-title, .stat-done .stat-value { -fx-text-fill: -color-success-text; }
+
+.stat-late {
+    -fx-background-color: -color-danger-bg;
+}
+.stat-late .stat-title, .stat-late .stat-value { -fx-text-fill: -color-danger-text; }
+
+/* ─── Graphiques ─── */
+.chart-container {
+    -fx-background-color: -color-bg;
+    -fx-background-radius: 10;
+    -fx-border-color: -color-border;
+    -fx-border-radius: 10;
+    -fx-padding: 10;
+}
+
+.axis-label, .axis {
+    -fx-tick-label-fill: -color-text-muted;
+}
+
+.chart-legend-item {
+    -fx-text-fill: -color-text-main;
+}
+
+/* ─── Séparateur ─── */
+.custom-separator .line {
+    -fx-border-color: -color-border;
+    -fx-border-width: 1 0 0 0;
+}

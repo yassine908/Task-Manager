@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.shape.*?>
+
+<BorderPane fx:id="rootPane" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.smarttaskmanager.controller.MainController"
+            styleClass="root-pane">
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--                  HEADER                   -->
+    <!-- ══════════════════════════════════════════ -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="16" styleClass="header-bar">
+
+            <!-- Icône / logo -->
+            <StackPane styleClass="logo-container">
+                <Label text="" styleClass="logo-icon"/>
+            </StackPane>
+
+            <!-- Titre + sous-titre -->
+            <VBox spacing="2">
+                <Label text="Smart Task Manager" styleClass="title-text"/>
+                <Label text="Organisez, priorisez, accomplissez." styleClass="subtitle-text"/>
+            </VBox>
+
+            <!-- Spacer -->
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- Badge message intelligent -->
+            <HBox alignment="CENTER_LEFT" spacing="8" styleClass="smart-badge">
+                <Label text="💡" />
+                <Label fx:id="smartMessage" text="Prêt pour une journée productive !" styleClass="smart-badge-text"/>
+            </HBox>
+
+            <!-- Bouton bascule Mode Clair / Sombre -->
+
+        </HBox>
+    </top>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--           CENTRE : FORM + TABLE           -->
+    <!-- ══════════════════════════════════════════ -->
+    <center>
+        <VBox spacing="24" styleClass="main-content">
+
+            <!-- ── Carte formulaire ── -->
+            <VBox spacing="16" styleClass="card">
+
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <StackPane styleClass="badge-primary">
+                        <Label text="+ Nouvelle tâche" styleClass="badge-text"/>
+                    </StackPane>
+                    <Label text="Remplissez les champs ci-dessous pour ajouter une tâche" styleClass="subtitle-text"/>
+                </HBox>
+
+                <!-- Ligne 1 : Titre + Description -->
+                <HBox spacing="16">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="TITRE" styleClass="input-label"/>
+                        <TextField fx:id="titleField" promptText="Ex: Préparer la présentation..." styleClass="input-field"/>
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="DESCRIPTION" styleClass="input-label"/>
+                        <TextField fx:id="descField" promptText="Détails supplémentaires..." styleClass="input-field"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Ligne 2 : Catégorie + Priorité + Date + Bouton -->
+                <HBox spacing="16" alignment="BOTTOM_LEFT">
+                    <VBox spacing="6">
+                        <Label text="CATÉGORIE" styleClass="input-label"/>
+                        <ComboBox fx:id="categoryBox" prefWidth="160" styleClass="input-field"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="PRIORITÉ" styleClass="input-label"/>
+                        <ComboBox fx:id="priorityBox" prefWidth="160" styleClass="input-field"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="DATE LIMITE" styleClass="input-label"/>
+                        <DatePicker fx:id="dueDatePicker" prefWidth="160" styleClass="input-field"/>
+                    </VBox>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <!-- Bouton Ajouter -->
+                    <Button fx:id="addButton" text="＋ Ajouter la tâche" onAction="#handleAddTask" styleClass="btn-primary"/>
+                </HBox>
+            </VBox>
+
+            <!-- ── Tableau des tâches ── -->
+            <VBox spacing="12" VBox.vgrow="ALWAYS" styleClass="card">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Mes tâches" styleClass="section-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="✔ Terminée" onAction="#handleMarkDone" styleClass="btn-success"/>
+                    <Button text="🗑 Supprimer" onAction="#handleDelete" styleClass="btn-danger"/>
+                    <Button text="⟳ Actualiser" onAction="#handleRefresh" styleClass="btn-secondary"/>
+                </HBox>
+
+                <TableView fx:id="taskTable" VBox.vgrow="ALWAYS" prefHeight="300" styleClass="custom-table">
+                    <columns>
+                        <TableColumn fx:id="colTitle" text="Titre" prefWidth="250"/>
+                        <TableColumn fx:id="colCategory" text="Catégorie" prefWidth="130"/>
+                        <TableColumn fx:id="colPriority" text="Priorité" prefWidth="110"/>
+                        <TableColumn fx:id="colStatus" text="Statut" prefWidth="130"/>
+                        <TableColumn fx:id="colDueDate" text="Échéance" prefWidth="130"/>
+                    </columns>
+                    <placeholder>
+                        <VBox alignment="CENTER" spacing="8">
+                            <Label text="📭" style="-fx-font-size: 40px;"/>
+                            <Label text="Aucune tâche pour l'instant" styleClass="title-text"/>
+                            <Label text="Créez votre première tâche ci-dessus" styleClass="subtitle-text"/>
+                        </VBox>
+                    </placeholder>
+                </TableView>
+            </VBox>
+        </VBox>
+    </center>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--           DROITE : STATISTIQUES           -->
+    <!-- ══════════════════════════════════════════ -->
+    <right>
+        <VBox spacing="24" styleClass="sidebar-right">
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="📊" style="-fx-font-size: 18px;"/>
+                <Label text="Statistiques" styleClass="section-title"/>
+            </HBox>
+
+            <!-- Cartes compteurs -->
+            <VBox spacing="12">
+                <HBox spacing="12">
+                    <VBox alignment="CENTER" spacing="4" styleClass="stat-card, stat-total" HBox.hgrow="ALWAYS">
+                        <Label text="TOTAL" styleClass="stat-title"/>
+                        <Label fx:id="totalLabel" text="0" styleClass="stat-value"/>
+                    </VBox>
+                    <VBox alignment="CENTER" spacing="4" styleClass="stat-card, stat-done" HBox.hgrow="ALWAYS">
+                        <Label text="TERMINÉES" styleClass="stat-title"/>
+                        <Label fx:id="doneLabel" text="0" styleClass="stat-value"/>
+                    </VBox>
+                </HBox>
+                <VBox alignment="CENTER" spacing="4" styleClass="stat-card, stat-late">
+                    <Label text="EN RETARD" styleClass="stat-title"/>
+                    <Label fx:id="lateLabel" text="0" styleClass="stat-value"/>
+                </VBox>
+            </VBox>
+
+            <Separator styleClass="custom-separator"/>
+
+            <!-- Graphiques -->
+            <VBox spacing="8" VBox.vgrow="ALWAYS">
+                <Label text="Répartition par statut" styleClass="input-label"/>
+                <StackPane styleClass="chart-container">
+                    <PieChart fx:id="pieChart" prefHeight="180" labelsVisible="false" legendSide="BOTTOM"/>
+                </StackPane>
+
+                <Region prefHeight="10"/>
+
+                <Label text="Tâches par catégorie" styleClass="input-label"/>
+                <StackPane styleClass="chart-container" VBox.vgrow="ALWAYS">
+                    <BarChart fx:id="barChart" prefHeight="180" legendVisible="false">
+                        <xAxis><CategoryAxis/></xAxis>
+                        <yAxis><NumberAxis/></yAxis>
+                    </BarChart>
+                </StackPane>
+            </VBox>
+        </VBox>
+    </right>
+
+</BorderPane>
