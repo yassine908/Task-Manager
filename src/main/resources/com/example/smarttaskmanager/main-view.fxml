@@ -104,6 +104,7 @@
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label text="Mes tâches" styleClass="section-title"/>
                     <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="✎ Modifier" onAction="#handleEditTask" styleClass="btn-secondary"/>
                     <Button text="✔ Terminée" onAction="#handleMarkDone" styleClass="btn-success"/>
                     <Button text="🗑 Supprimer" onAction="#handleDelete" styleClass="btn-danger"/>
                     <Button text="⟳ Actualiser" onAction="#handleRefresh" styleClass="btn-secondary"/>

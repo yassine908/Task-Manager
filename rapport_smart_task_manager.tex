@@ -1,0 +1,492 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{titlesec}
+
+\geometry{margin=2.3cm}
+
+\definecolor{codebg}{RGB}{248,250,252}
+\definecolor{codeborder}{RGB}{226,232,240}
+\definecolor{codekeyword}{RGB}{37,99,235}
+\definecolor{codestring}{RGB}{3,105,161}
+\definecolor{codecomment}{RGB}{100,116,139}
+
+\lstdefinestyle{javaStyle}{
+    backgroundcolor=\color{codebg},
+    frame=single,
+    rulecolor=\color{codeborder},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codekeyword}\bfseries,
+    stringstyle=\color{codestring},
+    commentstyle=\color{codecomment}\itshape,
+    showstringspaces=false,
+    breaklines=true,
+    tabsize=4,
+    numbers=left,
+    numberstyle=\tiny\color{codecomment},
+    xleftmargin=1.2em,
+    framexleftmargin=1em
+}
+
+\lstdefinestyle{xmlStyle}{
+    backgroundcolor=\color{codebg},
+    frame=single,
+    rulecolor=\color{codeborder},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codekeyword}\bfseries,
+    stringstyle=\color{codestring},
+    commentstyle=\color{codecomment}\itshape,
+    showstringspaces=false,
+    breaklines=true,
+    tabsize=4,
+    numbers=left,
+    numberstyle=\tiny\color{codecomment},
+    xleftmargin=1.2em,
+    framexleftmargin=1em,
+    language=XML
+}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.6em}{}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=codekeyword,
+    urlcolor=codekeyword,
+    pdftitle={Rapport technique - Smart Task Manager},
+    pdfauthor={Copilot}
+}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    {\Huge\bfseries Smart Task Manager\par}
+    \vspace{0.7cm}
+    {\Large Rapport technique de présentation\par}
+    \vspace{1.5cm}
+    {\large Application JavaFX, base de données MySQL et intégration Gemini\par}
+    \vfill
+    {\large Projet TP - Examen\par}
+    \vspace{0.3cm}
+    {\large \today\par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Idée générale de l'application}
+
+Smart Task Manager est une application de gestion de tâches développée en Java avec JavaFX. Son objectif est de fournir un espace unique pour créer, organiser, suivre et analyser des tâches personnelles ou académiques. L'application combine une interface graphique moderne, une persistance des données dans MySQL et un assistant intelligent basé sur Gemini afin d'accompagner l'utilisateur dans l'organisation de son travail.
+
+L'application couvre les besoins suivants :
+\begin{itemize}[leftmargin=1.4em]
+    \item authentification et inscription des utilisateurs ;
+    \item création, suppression et mise à jour du statut des tâches ;
+    \item classification par catégorie, priorité et date limite ;
+    \item affichage de statistiques sous forme de cartes et de graphiques ;
+    \item assistance IA pour aider à formuler, prioriser et comprendre les tâches.
+\end{itemize}
+
+L'approche retenue sépare clairement les responsabilités : la vue est définie en FXML, les comportements sont gérés par les controllers, la logique de persistance passe par les DAO, et les entités représentent les données métier.
+
+\section{Architecture générale du projet}
+
+Le projet suit une structure Maven classique, enrichie avec une organisation par couches.
+
+\begin{lstlisting}[style=javaStyle,caption={Arborescence fonctionnelle du projet}]
+src/main/java/com/example/smarttaskmanager/
++-- MainApp.java
++-- controller/
+|   +-- AuthController.java
+|   +-- MainController.java
++-- database/
+|   +-- DatabaseConnection.java
+|   +-- TaskDAO.java
+|   +-- UserDAO.java
++-- model/
+|   +-- Task.java
+|   +-- User.java
++-- util/
+    +-- GeminiService.java
+    +-- PasswordUtils.java
+
+src/main/resources/com/example/smarttaskmanager/
++-- auth-view.fxml
++-- main-view.fxml
++-- style.css
+\end{lstlisting}
+
+Cette architecture permet de distinguer :
+\begin{itemize}[leftmargin=1.4em]
+    \item la couche présentation avec les fichiers FXML et CSS ;
+    \item la couche contrôle avec les controllers JavaFX ;
+    \item la couche métier avec les classes `Task` et `User` ;
+    \item la couche accès aux données avec la connexion SQL et les DAO ;
+    \item la couche utilitaire avec le service Gemini et les outils de sécurité sur les mots de passe.
+\end{itemize}
+
+Le fichier `module-info.java` active le système de modules Java en ouvrant les packages nécessaires à JavaFX. Le projet est donc structuré pour un fonctionnement propre avec FXML et injection des contrôleurs.
+
+\section{Réalisation technique}
+
+\subsection{La classe principale}
+
+La classe `MainApp` est le point d'entrée de l'application. Elle hérite de `javafx.application.Application`, charge la vue d'authentification au démarrage, puis affiche la vue principale après connexion réussie.
+
+\begin{lstlisting}[style=javaStyle,caption={Rôle principal de MainApp}]
+public class MainApp extends Application {
+
+    private static Stage primaryStage;
+
+    @Override
+    public void start(Stage stage) throws Exception {
+        primaryStage = stage;
+        showAuthView();
+    }
+
+    public static void showAuthView() throws Exception {
+        FXMLLoader loader = new FXMLLoader(
+                MainApp.class.getResource("/com/example/smarttaskmanager/auth-view.fxml")
+        );
+        Scene scene = new Scene(loader.load(), 900, 620);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+}
+\end{lstlisting}
+
+Cette classe centralise la navigation entre les pages : écran de connexion/inscription puis écran principal.
+
+\subsection{Les controllers}
+
+Le projet utilise deux controllers principaux.
+
+\subsubsection{AuthController}
+
+`AuthController` gère l'inscription et la connexion. Il réalise une validation locale avant d'appeler la couche base de données : champs obligatoires, format de l'adresse mail, longueur minimale du mot de passe, et vérification de confirmation du mot de passe.
+
+\begin{lstlisting}[style=javaStyle,caption={Validation et connexion dans AuthController}]
+@FXML
+private void handleLogin() {
+    loginErrorLabel.setText("");
+
+    String email = loginEmailField.getText().trim();
+    String password = loginPasswordField.getText();
+
+    if (email.isBlank() || password.isBlank()) {
+        loginErrorLabel.setText("Adresse mail et mot de passe obligatoires.");
+        return;
+    }
+
+    try {
+        User user = userDAO.login(email, password);
+        MainApp.showMainView(user);
+    } catch (Exception e) {
+        loginErrorLabel.setText(e.getMessage());
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[style=javaStyle,caption={Inscription d'un utilisateur}]
+@FXML
+private void handleRegister() {
+    if (!email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+        registerErrorLabel.setText("Adresse mail invalide.");
+        return;
+    }
+
+    if (password.length() < 6) {
+        registerErrorLabel.setText("Le mot de passe doit contenir au moins 6 caractères.");
+        return;
+    }
+
+    User user = userDAO.register(firstName, lastName, email, password);
+    MainApp.showMainView(user);
+}
+\end{lstlisting}
+
+\subsubsection{MainController}
+
+`MainController` pilote le tableau de bord principal. Il initialise les listes déroulantes, relie le `TableView` aux propriétés de `Task`, charge les tâches depuis la base de données et actualise les statistiques.
+
+Ses responsabilités sont les suivantes :
+\begin{itemize}[leftmargin=1.4em]
+    \item ajouter une tâche ;
+    \item supprimer une tâche sélectionnée ;
+    \item marquer une tâche comme terminée ;
+    \item charger les tâches de l'utilisateur connecté ;
+    \item calculer les indicateurs de performance ;
+    \item ouvrir et gérer le chatbot Gemini.
+\end{itemize}
+
+Le chargement des données est encapsulé dans `loadTasks()`, puis les méthodes `updateStats()`, `updateCharts()` et `updateSmartMessage()` produisent une vue d'ensemble dynamique.
+
+\begin{lstlisting}[style=javaStyle,caption={Chargement et affichage des tâches}]
+private void loadTasks() {
+    if (taskDAO == null) {
+        return;
+    }
+
+    List<Task> tasks = taskDAO.getAllTasks();
+    taskList.setAll(tasks);
+    taskTable.setItems(taskList);
+
+    updateStats(tasks);
+    updateCharts(tasks);
+    updateSmartMessage(tasks);
+}
+\end{lstlisting}
+
+\subsection{Les entités métier}
+
+Les classes `User` et `Task` sont de simples objets métier qui transportent les données entre l'interface et la base de données.
+
+`User` contient l'identifiant, le nom, le prénom et l'adresse mail. Une méthode utilitaire `getFullName()` construit le nom complet affiché dans l'interface.
+
+`Task` contient :
+\begin{itemize}[leftmargin=1.4em]
+    \item `id` et `userId` pour l'identification ;
+    \item `title` et `description` pour le contenu ;
+    \item `category` et `priority` pour l'organisation ;
+    \item `status` pour le suivi ;
+    \item `dueDate` pour l'échéance.
+\end{itemize}
+
+Cette modélisation est adaptée à l'affichage dans un tableau JavaFX et à la persistance SQL.
+
+\subsection{La couche base de données}
+
+La persistance repose sur MySQL. La classe `DatabaseConnection` ouvre une connexion JDBC vers la base `smart_task_db`.
+
+\begin{lstlisting}[style=javaStyle,caption={Connexion JDBC centralisée}]
+private static final String URL = "jdbc:mysql://localhost:3306/smart_task_db";
+private static final String USER = "root";
+private static final String PASSWORD = "";
+
+public static Connection getConnection() {
+    if (connection == null) {
+        connection = DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+    return connection;
+}
+\end{lstlisting}
+
+Cette connexion est réutilisée par les DAO afin d'éviter de multiplier les objets de connexion dans toute l'application.
+
+\subsubsection{UserDAO}
+
+`UserDAO` gère l'inscription et l'authentification. Il crée automatiquement la table `users` si elle n'existe pas encore, ce qui facilite le lancement du projet sur un nouveau poste.
+
+Points techniques importants :
+\begin{itemize}[leftmargin=1.4em]
+    \item les requêtes SQL sont paramétrées avec `PreparedStatement` ;
+    \item l'adresse mail est normalisée en minuscules et sans espaces ;
+    \item le mot de passe n'est jamais stocké en clair ;
+    \item le hash est généré via `PasswordUtils` ;
+    \item la validation de doublon d'email est faite avant l'insertion.
+\end{itemize}
+
+\begin{lstlisting}[style=javaStyle,caption={Création d'un compte utilisateur}]
+String sql = """
+        INSERT INTO users (first_name, last_name, email, password_hash)
+        VALUES (?, ?, ?, ?)
+        """;
+
+try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+    stmt.setString(1, firstName);
+    stmt.setString(2, lastName);
+    stmt.setString(3, normalizeEmail(email));
+    stmt.setString(4, PasswordUtils.hashPassword(password));
+    stmt.executeUpdate();
+}
+\end{lstlisting}
+
+\subsubsection{TaskDAO}
+
+`TaskDAO` est dédié aux opérations CRUD de base sur les tâches. Chaque tâche est liée à un utilisateur via `user_id`, ce qui garantit l'isolation des données entre comptes.
+
+Ce DAO assure notamment :
+\begin{itemize}[leftmargin=1.4em]
+    \item l'ajout d'une tâche ;
+    \item la lecture filtrée par utilisateur ;
+    \item la suppression d'une tâche ;
+    \item la mise à jour du statut ;
+    \item l'ajout automatique de la colonne `user_id` si la table existait déjà.
+\end{itemize}
+
+\begin{lstlisting}[style=javaStyle,caption={Récupération des tâches de l'utilisateur connecté}]
+public List<Task> getAllTasks() {
+    List<Task> tasks = new ArrayList<>();
+    String sql = "SELECT * FROM tasks WHERE user_id = ? ORDER BY due_date ASC";
+
+    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, userId);
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            Task t = new Task();
+            t.setId(rs.getInt("id"));
+            t.setTitle(rs.getString("title"));
+            t.setStatus(rs.getString("status"));
+            tasks.add(t);
+        }
+    }
+    return tasks;
+}
+\end{lstlisting}
+
+\section{Intégration de l'IA dans l'application}
+
+L'intégration de l'intelligence artificielle est l'un des points forts du projet. Elle repose sur Gemini, appelé depuis la classe utilitaire `GeminiService`.
+
+\subsection{Principe général}
+
+Le fonctionnement est le suivant :
+\begin{enumerate}[leftmargin=1.4em]
+    \item l'utilisateur ouvre le chatbot depuis l'interface principale ;
+    \item le message saisi est envoyé au service Gemini ;
+    \item le prompt inclut le contexte des tâches déjà enregistrées ;
+    \item l'appel réseau est lancé dans un thread séparé pour ne pas bloquer JavaFX ;
+    \item la réponse est affichée dans la fenêtre de discussion.
+\end{enumerate}
+
+\subsection{Construction du prompt}
+
+Avant d'interroger Gemini, l'application construit un contexte textuel contenant les tâches existantes. Cela permet à l'assistant de répondre de manière plus pertinente par rapport au planning de l'utilisateur.
+
+\begin{lstlisting}[style=javaStyle,caption={Construction du contexte IA}]
+private String buildGeminiPrompt(String message) {
+    StringBuilder prompt = new StringBuilder();
+    prompt.append("Tu es Gemini, l'assistant IA d'une application JavaFX nommée Smart Task Manager.\n");
+    prompt.append("Réponds en français, de façon concise et utile.\n");
+    prompt.append("Tâches actuelles :\n");
+
+    List<Task> tasks = taskDAO.getAllTasks();
+    for (Task task : tasks) {
+        prompt.append("- ").append(task.getTitle())
+              .append(" | catégorie: ").append(task.getCategory())
+              .append(" | priorité: ").append(task.getPriority())
+              .append(" | statut: ").append(task.getStatus())
+              .append(" | échéance: ").append(task.getDueDate())
+              .append("\n");
+    }
+
+    prompt.append("\nQuestion utilisateur : ").append(message);
+    return prompt.toString();
+}
+\end{lstlisting}
+
+\subsection{Appel à l'API Gemini}
+
+`GeminiService` construit une requête HTTP POST vers l'API Generative Language. La réponse JSON est ensuite analysée pour récupérer le texte généré.
+
+\begin{lstlisting}[style=javaStyle,caption={Appel réseau vers Gemini}]
+public static String askGemini(String prompt) {
+    String endpoint = "https://generativelanguage.googleapis.com/v1beta/models/"
+            + MODEL + ":generateContent?key=" + API_KEY;
+
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestMethod("POST");
+    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    conn.setDoOutput(true);
+
+    // envoi du JSON puis lecture de la réponse
+}
+\end{lstlisting}
+
+\subsection{Gestion asynchrone}
+
+Dans `MainController`, l'appel à Gemini est lancé via `javafx.concurrent.Task<String>`. Ce choix est important car JavaFX exige que l'interface reste réactive. Si l'appel réseau était exécuté sur le thread principal, la fenêtre pourrait se figer pendant l'attente de la réponse.
+
+\begin{itemize}[leftmargin=1.4em]
+    \item `setOnSucceeded(...)` ajoute la réponse dans l'historique de chat ;
+    \item `setOnFailed(...)` affiche un message d'erreur utilisateur ;
+    \item un indicateur d'état informe si Gemini est en train de réfléchir.
+\end{itemize}
+
+\section{Pages FXML et interface graphique}
+
+\subsection{auth-view.fxml}
+
+La page d'authentification est construite autour d'un `TabPane` avec deux onglets : connexion et inscription. L'objectif est de proposer un écran clair et direct pour les deux scénarios d'accès.
+
+Les composants principaux sont :
+\begin{itemize}[leftmargin=1.4em]
+    \item champs email et mot de passe pour la connexion ;
+    \item champs prénom, nom, email et mot de passe pour l'inscription ;
+    \item labels de retour d'erreur ;
+    \item boutons d'action liés au controller `AuthController`.
+\end{itemize}
+
+\subsection{main-view.fxml}
+
+La page principale est organisée en trois zones : en-tête, centre et panneau latéral.
+
+\begin{itemize}[leftmargin=1.4em]
+    \item l'en-tête affiche le titre, l'utilisateur connecté, la déconnexion et l'accès au bot IA ;
+    \item la zone centrale contient le formulaire d'ajout et le tableau des tâches ;
+    \item la colonne de droite affiche les statistiques et les graphiques.
+\end{itemize}
+
+Cette vue est plus riche fonctionnellement et montre l'état global du projet : CRUD, statistiques visuelles et assistant intelligent.
+
+\subsection{style.css}
+
+Le fichier CSS apporte une identité visuelle cohérente : cartes arrondies, couleurs de contraste, boutons différenciés et style des graphiques. Il améliore aussi la lisibilité du `TableView` et de la fenêtre de chat.
+
+L'interface est donc séparée proprement du comportement applicatif, ce qui facilite les évolutions graphiques sans toucher à la logique métier.
+
+\section{Configuration Maven et changements dans le pom.xml}
+
+Le fichier `pom.xml` configure le projet JavaFX et ses dépendances.
+
+Les éléments importants sont :
+\begin{itemize}[leftmargin=1.4em]
+    \item les modules JavaFX : `javafx-controls`, `javafx-fxml`, `javafx-web`, `javafx-swing`, `javafx-media` ;
+    \item les bibliothèques d'interface complémentaires : ControlsFX, FormsFX, ValidatorFX, Ikonli, BootstrapFX, TilesFX, FXGL ;
+    \item le connecteur MySQL `mysql-connector-j` ;
+    \item la bibliothèque `org.json` pour parser les réponses Gemini ;
+    \item le plugin `javafx-maven-plugin` pour lancer l'application avec `mvn javafx:run`.
+\end{itemize}
+
+Le `pom.xml` contient aussi quelques dépendances JavaFX en double avec deux versions différentes. Fonctionnellement, cela illustre l'évolution du projet au cours du développement, mais pour une version finale il serait préférable de nettoyer ces doublons afin de garder une configuration plus lisible et plus stable.
+
+\section{Consultation générale sur le projet}
+
+Ce projet est globalement bien structuré et couvre plusieurs notions importantes vues en TP : interface JavaFX, séparation MVC, accès SQL, gestion des utilisateurs, statistiques et intégration d'un service externe.
+
+Les points forts sont :
+\begin{itemize}[leftmargin=1.4em]
+    \item une séparation claire entre vues, controllers, modèles et DAO ;
+    \item une interface plus moderne que les formulaires JavaFX classiques ;
+    \item l'utilisation de `PreparedStatement`, ce qui limite les risques d'injection SQL ;
+    \item la prise en compte de l'expérience utilisateur avec graphiques, indicateurs et chatbot ;
+    \item l'usage d'un thread séparé pour l'IA, ce qui préserve la fluidité de l'interface.
+\end{itemize}
+
+Les points à améliorer pour une version plus robuste sont :
+\begin{itemize}[leftmargin=1.4em]
+    \item externaliser la clé API Gemini au lieu de la laisser en dur dans le code ;
+    \item externaliser aussi les identifiants MySQL dans un fichier de configuration ;
+    \item harmoniser les dépendances du `pom.xml` et supprimer les doublons ;
+    \item ajouter davantage de gestion d'erreurs côté base de données ;
+    \item prévoir des tests unitaires pour les services et les validations.
+\end{itemize}
+
+\section{Conclusion}
+
+Smart Task Manager est une application complète de gestion de tâches qui montre une bonne maîtrise de JavaFX, de la persistance relationnelle et de l'intégration d'un service d'IA. Le projet ne se limite pas à un simple CRUD : il propose une visualisation des tâches, une navigation claire entre les écrans et un assistant intelligent qui enrichit l'expérience utilisateur.
+
+Dans le cadre d'un examen TP, ce projet permet de présenter à la fois la logique applicative, l'architecture technique et les choix de conception retenus pour obtenir une solution fonctionnelle et évolutive.
+
+\end{document}

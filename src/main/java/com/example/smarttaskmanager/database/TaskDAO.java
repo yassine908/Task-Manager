@@ -90,6 +90,33 @@ public class TaskDAO {
         }
     }
 
+    // Modifier une tâche
+    public void updateTask(Task task) {
+        String sql = """
+                UPDATE tasks
+                SET title = ?, description = ?, category = ?, priority = ?, status = ?, due_date = ?
+                WHERE id = ? AND user_id = ?
+                """;
+        if (conn == null) {
+            System.out.println("Connexion base de données indisponible.");
+            return;
+        }
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, task.getTitle());
+            stmt.setString(2, task.getDescription());
+            stmt.setString(3, task.getCategory());
+            stmt.setString(4, task.getPriority());
+            stmt.setString(5, task.getStatus());
+            stmt.setDate(6, task.getDueDate() != null ? Date.valueOf(task.getDueDate()) : null);
+            stmt.setInt(7, task.getId());
+            stmt.setInt(8, userId);
+            stmt.executeUpdate();
+            System.out.println("Tâche modifiée !");
+        } catch (SQLException e) {
+            System.out.println("Erreur modification : " + e.getMessage());
+        }
+    }
+
     // Mettre à jour le statut
     public void updateStatus(int id, String newStatus) {
         String sql = "UPDATE tasks SET status = ? WHERE id = ? AND user_id = ?";

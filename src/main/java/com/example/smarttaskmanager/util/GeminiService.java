@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 
 public class GeminiService {
 
-    private static final String API_KEY = "AIzaSyAbUcXAGrc7yve0OvqTY8Ip_b3Lf5g1jxE";
+    private static final String API_KEY = "AIzaSyAGDdFUxVgafSXVl2aPjImr0dVxTQYwKsE";
     private static final String MODEL   = "gemini-2.5-flash";
 
     public static String askGemini(String prompt) {

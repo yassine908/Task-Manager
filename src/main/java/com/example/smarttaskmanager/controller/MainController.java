@@ -152,6 +152,99 @@ public class MainController implements Initializable {
     }
 
     // ====================================================
+    // MODIFIER UNE TÂCHE
+    // ====================================================
+    @FXML
+    private void handleEditTask() {
+        Task selected = taskTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("Attention", "Sélectionne une tâche à modifier !");
+            return;
+        }
+
+        TextField editTitleField = new TextField(safeText(selected.getTitle()));
+        editTitleField.getStyleClass().add("input-field");
+
+        TextField editDescField = new TextField(safeText(selected.getDescription()));
+        editDescField.getStyleClass().add("input-field");
+
+        ComboBox<String> editCategoryBox = new ComboBox<>(FXCollections.observableArrayList(
+                "Travail", "Personnel", "Études", "Autre"
+        ));
+        editCategoryBox.setValue(selected.getCategory() == null ? "Travail" : selected.getCategory());
+        editCategoryBox.getStyleClass().add("input-field");
+
+        ComboBox<String> editPriorityBox = new ComboBox<>(FXCollections.observableArrayList(
+                "Haute", "Moyenne", "Basse"
+        ));
+        editPriorityBox.setValue(selected.getPriority() == null ? "Moyenne" : selected.getPriority());
+        editPriorityBox.getStyleClass().add("input-field");
+
+        ComboBox<String> editStatusBox = new ComboBox<>(FXCollections.observableArrayList(
+                "À faire", "En cours", "Terminée"
+        ));
+        editStatusBox.setValue(selected.getStatus() == null ? "À faire" : selected.getStatus());
+        editStatusBox.getStyleClass().add("input-field");
+
+        DatePicker editDueDatePicker = new DatePicker(selected.getDueDate());
+        editDueDatePicker.getStyleClass().add("input-field");
+
+        Dialog<Task> dialog = new Dialog<>();
+        dialog.setTitle("Modifier la tâche");
+        dialog.setHeaderText("Modifier : " + safeText(selected.getTitle()));
+        if (rootPane.getScene() != null && rootPane.getScene().getWindow() != null) {
+            dialog.initOwner(rootPane.getScene().getWindow());
+        }
+
+        ButtonType saveButtonType = new ButtonType("Enregistrer", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+        VBox content = new VBox(12,
+                createFieldGroup("TITRE", editTitleField),
+                createFieldGroup("DESCRIPTION", editDescField),
+                createFieldGroup("CATÉGORIE", editCategoryBox),
+                createFieldGroup("PRIORITÉ", editPriorityBox),
+                createFieldGroup("STATUT", editStatusBox),
+                createFieldGroup("DATE LIMITE", editDueDatePicker)
+        );
+        content.setPrefWidth(420);
+        dialog.getDialogPane().setContent(content);
+        if (rootPane.getScene() != null) {
+            dialog.getDialogPane().getStylesheets().addAll(rootPane.getScene().getStylesheets());
+        }
+
+        Button saveButton = (Button) dialog.getDialogPane().lookupButton(saveButtonType);
+        saveButton.addEventFilter(javafx.event.ActionEvent.ACTION, event -> {
+            if (editTitleField.getText().trim().isEmpty()) {
+                showAlert("⚠️ Erreur", "Le titre est obligatoire !");
+                event.consume();
+            }
+        });
+
+        dialog.setResultConverter(buttonType -> {
+            if (buttonType != saveButtonType) {
+                return null;
+            }
+
+            Task updatedTask = new Task();
+            updatedTask.setId(selected.getId());
+            updatedTask.setUserId(selected.getUserId());
+            updatedTask.setTitle(editTitleField.getText().trim());
+            updatedTask.setDescription(editDescField.getText());
+            updatedTask.setCategory(editCategoryBox.getValue());
+            updatedTask.setPriority(editPriorityBox.getValue());
+            updatedTask.setStatus(editStatusBox.getValue());
+            updatedTask.setDueDate(editDueDatePicker.getValue());
+            return updatedTask;
+        });
+
+        dialog.showAndWait().ifPresent(updatedTask -> {
+            taskDAO.updateTask(updatedTask);
+            loadTasks();
+        });
+    }
+
+    // ====================================================
     // ✔️ MARQUER COMME TERMINÉE
     // ====================================================
     @FXML
@@ -349,6 +442,17 @@ public class MainController implements Initializable {
         alert.setTitle(title);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private VBox createFieldGroup(String labelText, Control field) {
+        Label label = new Label(labelText);
+        label.getStyleClass().add("input-label");
+        field.setMaxWidth(Double.MAX_VALUE);
+        return new VBox(6, label, field);
+    }
+
+    private String safeText(String value) {
+        return value == null ? "" : value;
     }
 
     private void createChatBotWindow() {
